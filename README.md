@@ -29,10 +29,14 @@
 │   ├── curriculum/         # 커리큘럼 추출 결과물 (.md) 저장 위치
 │   └── reference/          # 레퍼런스(수행실적) 추출 결과물 (.md) 저장 위치
 │
-├── clean_pptx_names.py     # 파일명 일괄 정제 스크립트 (공통 유틸리티)
-├── pptx_to_curriculum.py   # [커리큘럼 전용] PPTX 파싱 및 Markdown 변환 엔진
-├── pptx_to_reference.py    # [레퍼런스 전용] PPTX 파싱 및 Markdown 변환 엔진 (추가 예정)
+├── utils/                  # [공통 모듈 폴더]
+│   ├── clean_pptx_names.py # 파일명 일괄 정제 스크립트
+│   └── pptx_parser.py      # PPTX 파싱, 숨김 슬라이드 필터링 및 텍스트 추출 공통 로직
+│
+├── extract_curriculum.py   # [커리큘럼 전용] PPTX 파싱 및 Markdown 변환 엔진
+├── extract_reference.py    # [레퍼런스 전용] PPTX 파싱 및 Markdown 변환 엔진 (추가 예정)
 │
 ├── .env                    # (Git 커밋 제외) OpenAI API Key 보관
 ├── .gitignore              # 보안을 위한 Git 무시 파일 목록
 └── README.md               # 프로젝트 설명서
+```
