@@ -13,5 +13,9 @@ input/*
 !input/.gitkeep
 output/curriculum/*
 !output/curriculum/.gitkeep
+output/curriculum_store/*
+!output/curriculum_store/.gitkeep
+output/module_store/*
+!output/module_store/.gitkeep
 output/reference/*
 !output/reference/.gitkeep
