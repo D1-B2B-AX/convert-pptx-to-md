@@ -35,24 +35,24 @@ PPTX 파일을 multipart로 업로드하면 dual store 결과를 반환합니다
 
 ```bash
 curl -X POST https://your-railway-url/extract \
-  -F "file=@IBK기업은행 LLM 역량 육성.pptx"
+  -F "file=@ABC기업 AI 역량 강화.pptx"
 ```
 
 **응답 예시:**
 
 ```json
 {
-  "source_file": "IBK기업은행 LLM 역량 육성.pptx",
+  "source_file": "ABC기업 AI 역량 강화.pptx",
   "courses": [
     {
-      "doc_id": "CURR::ibk기업은행_llm_역량_육성_c1",
+      "doc_id": "CURR::abc기업_ai_역량_강화_c1",
       "curriculum_store": {
-        "content": "# [COURSE] LLM 역량 육성 과정\n...",
-        "metadata": { "doc_type": "curriculum", "client": "IBK기업은행", ... }
+        "content": "# [COURSE] AI 역량 강화 과정\n...",
+        "metadata": { "doc_type": "curriculum", "client": "ABC기업", ... }
       },
       "module_store": [
         { "filename": "course_overview.md", "content": "...", "metadata": { ... } },
-        { "filename": "d01_m01_large_language_model의_이해.md", "content": "...", "metadata": { ... } },
+        { "filename": "d01_m01_llm_기초.md", "content": "...", "metadata": { ... } },
         ...
       ]
     }

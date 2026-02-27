@@ -10,7 +10,7 @@
 과정 하나 = MD 파일 하나.
 
 ```
-IBK기업은행_LLM_역량_육성_Course_1.md  (~3,000 토큰)
+ABC기업_ai_역량_강화_Course_1.md  (~3,000 토큰)
 ├── 과정 메타데이터 (DOC_ID, CLIENT, INDUSTRY, ...)
 ├── 교육 개요
 ├── [MODULE] m01 (~130 토큰)
@@ -33,7 +33,7 @@ IBK기업은행_LLM_역량_육성_Course_1.md  (~3,000 토큰)
 
 ```
 output/curriculum/
-  IBK기업은행_LLM_역량_육성/
+  ABC기업_ai_역량_강화/
     course_overview.md              ← 과정 전체 정보
     d01_m01_llm의_이해.md           ← 모듈별 개별 파일
     d01_m02_embedding과_rag.md
@@ -49,20 +49,20 @@ output/curriculum/
 과정 레벨 쿼리를 전담하는 파일. 전체 메타데이터, 교육 개요, 로드맵을 포함한다.
 
 ```
-# IBK기업은행: LLM 역량 육성 과정
-DOC_ID: CURR::ibk기업은행_llm_역량_육성_c1
-CLIENT: IBK기업은행
-INDUSTRY: 금융
+# ABC기업: AI 역량 강화 과정
+DOC_ID: CURR::abc기업_lai_역량_강화_c1
+CLIENT: ABC기업
+INDUSTRY: 제조
 TOPIC: LLM, RAG, 파인튜닝
 TARGET: 조직 내 AI 적용을 주도할 수 있는 실전형 인재
 LEVEL: 전 수준
 DURATION: 21H (3일)
 TOOLS: Transformer, Langchain, VectorDB, PEFT, RLHF, GRPO
 FORMAT: 오프라인
-SOURCE_FILE: IBK기업은행 LLM 역량 육성.pptx
+SOURCE_FILE: ABC기업 AI 역량 강화.pptx
 
 ## 교육 개요
-IBK기업은행에 맞춤 교육을 통해 조직 내 AI 적용을 주도할 수 있는 실전형 인재를 양성하는 것이 목표입니다. 교육은 LLM과 RAG 구조 이해, 파인튜닝 및 성능 개선 방법을 다룹니다.
+ABC기업에 맞춤 교육을 통해 조직 내 AI 적용을 주도할 수 있는 실전형 인재를 양성하는 것이 목표입니다. 교육은 LLM과 RAG 구조 이해, 파인튜닝 및 성능 개선 방법을 다룹니다.
 
 ## 로드맵
 1일차 LLM 기초 → 2일차 RAG 응용 → 3일차 파인튜닝 및 최적화
@@ -89,8 +89,8 @@ IBK기업은행에 맞춤 교육을 통해 조직 내 AI 적용을 주도할 수
 **본문:**
 
 ```
-# IBK기업은행: LLM 역량 육성 과정
-1일차 | 21H | 금융 | 전 수준
+# ABC기업: AI 역량 강화 과정
+1일차 | 21H | 제조 | 전 수준
 
 ## Embedding과 RAG
 MODULE_SUMMARY: RAG 방법론 및 활용과 임베딩 모델을 학습합니다.
@@ -113,11 +113,11 @@ TOOLS: Langchain, VectorDB
 
 ```json
 {
-  "doc_id": "CURR::ibk기업은행_llm_역량_육성_c1::m02",
+  "doc_id": "CURR::abc기업_lai_역량_강화_c1::m02",
   "doc_type": "module",
-  "course_name": "LLM 역량 육성 과정",
-  "client": "IBK기업은행",
-  "industry": "금융",
+  "course_name": "AI 역량 강화 과정",
+  "client": "ABC기업",
+  "industry": "제조",
   "module_name": "Embedding과 RAG",
   "module_summary": "RAG 방법론 및 활용과 임베딩 모델을 학습합니다.",
   "day": 1,
@@ -125,7 +125,7 @@ TOOLS: Langchain, VectorDB
   "duration": "2H",
   "tools": "Langchain, VectorDB",
   "level": "전 수준",
-  "source_file": "IBK기업은행 LLM 역량 육성.pptx"
+  "source_file": "ABC기업 AI 역량 강화.pptx"
 }
 ```
 
@@ -136,7 +136,7 @@ TOOLS: Langchain, VectorDB
 | 방식 | 장점 | 단점 |
 |---|---|---|
 | 전체 메타데이터 반복 | 파일 하나로 완전 자립 | 11개 파일 임베딩이 유사해져 검색 구분력 저하 |
-| 컨텍스트 없음 (metadata만) | 임베딩 고유성 최대 | "IBK기업은행 교육" 검색 시 텍스트에 없어서 안 잡힘 |
+| 컨텍스트 없음 (metadata만) | 임베딩 고유성 최대 | "ABC기업 교육" 검색 시 텍스트에 없어서 안 잡힘 |
 | **최소 컨텍스트 (2줄)** | **검색 가능 + 임베딩 고유성 유지** | metadata_filter 병행 필요 |
 
 채택: **최소 컨텍스트 (2줄)**. 과정명과 고객사가 본문에 포함되어 semantic search에 잡히면서, 모듈 고유 내용이 임베딩의 대부분을 차지하여 모듈 간 구분력을 유지한다.
