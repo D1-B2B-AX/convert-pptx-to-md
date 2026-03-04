@@ -61,18 +61,18 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
 [Output Format - 반드시 이 구조를 따르십시오]
 
 # [COURSE] {{과정명}}
-DOC_ID: {doc_id}
-SOURCE_FILE: {filename}
-CLIENT: {{고객사명 - 파일명이나 본문에서 추출}}
-INDUSTRY: {{산업군 - 금융/제조/IT/통신/유통/공공/에너지/의료/교육/기타}}
-TARGET_ROLE: {{교육 대상 직무}}
-LEVEL: {{초급 / 기초 / 중급 / 고급 중 택 1}}
-DURATION: {{총 교육 시수}}
-TOOLS_USED: {{사용 도구 - 쉼표 구분}}
-EDUCATION_FORMAT: {{특강/데모형 / 이론/개념 전달형 / 실습/툴 마스터형 / 프로젝트/PoC형 / 워크숍/문제 해결형 중 택 1}}
-DOMAIN: {{GenAI 또는 MLDL}}
-SKILL_CATEGORY: {{G-T, G-M, G-R, G-A, G-C, D-T, D-M, D-A, D-C 중 택 1}}
-SKILL_ID: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
+docId: {doc_id}
+sourceFile: {filename}
+client: {{고객사명 - 파일명이나 본문에서 추출}}
+industry: {{산업군 - 금융/제조/IT/통신/유통/공공/에너지/의료/교육/기타}}
+targetRole: {{교육 대상 직무}}
+level: {{초급 / 기초 / 중급 / 고급 중 택 1}}
+duration: {{총 교육 시수}}
+toolsUsed: {{사용 도구 - 쉼표 구분}}
+educationFormat: {{특강/데모형 / 이론/개념 전달형 / 실습/툴 마스터형 / 프로젝트/PoC형 / 워크숍/문제 해결형 중 택 1}}
+domain: {{GenAI 또는 MLDL}}
+skillCategory: {{G-T, G-M, G-R, G-A, G-C, D-T, D-M, D-A, D-C 중 택 1}}
+skillId: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
 
 ## 교육 개요
 {{교육의 배경, 목적, 학습 목표를 2~4문장으로 요약}}
@@ -117,16 +117,16 @@ SKILL_ID: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
             "courseIndex": course_idx,
         }
         field_patterns = {
-            "client": r'^CLIENT: (.+)$',
-            "industry": r'^INDUSTRY: (.+)$',
-            "targetRole": r'^TARGET_ROLE: (.+)$',
-            "level": r'^LEVEL: (.+)$',
-            "duration": r'^DURATION: (.+)$',
-            "toolsUsed": r'^TOOLS_USED: (.+)$',
-            "educationFormat": r'^EDUCATION_FORMAT: (.+)$',
-            "domain": r'^DOMAIN: (.+)$',
-            "skillCategory": r'^SKILL_CATEGORY: (.+)$',
-            "skillId": r'^SKILL_ID: (.+)$',
+            "client": r'^client: (.+)$',
+            "industry": r'^industry: (.+)$',
+            "targetRole": r'^targetRole: (.+)$',
+            "level": r'^level: (.+)$',
+            "duration": r'^duration: (.+)$',
+            "toolsUsed": r'^toolsUsed: (.+)$',
+            "educationFormat": r'^educationFormat: (.+)$',
+            "domain": r'^domain: (.+)$',
+            "skillCategory": r'^skillCategory: (.+)$',
+            "skillId": r'^skillId: (.+)$',
         }
         for key, pattern in field_patterns.items():
             match = re.search(pattern, result, re.MULTILINE)
