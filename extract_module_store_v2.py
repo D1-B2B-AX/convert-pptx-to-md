@@ -2,18 +2,17 @@ import os
 import re
 import json
 from pptx import Presentation
-from openai import OpenAI
 from dotenv import load_dotenv
 from utils.pptx_parser import (
     generate_doc_id, group_slides_into_courses, strip_code_fences
 )
+from llm_client import generate as llm_generate
 
 load_dotenv()
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 SOURCE_DIR = './input'
 OUTPUT_DIR = './output/module_store'
-SKILL_CATALOG_PATH = os.path.join(os.path.dirname(__file__), '..', 'skill_catalog_260226_v1.md')
+SKILL_CATALOG_PATH = os.path.join(os.path.dirname(__file__), 'skill_catalog_260226_v1.md')
 
 
 def load_skill_catalog():
@@ -96,13 +95,7 @@ def generate_module_store_json(filename, course_idx, overview_text, curriculum_t
 """
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": prompt}],
-            response_format={"type": "json_object"},
-            temperature=0
-        )
-        result = response.choices[0].message.content.strip()
+        result = llm_generate(prompt, json_mode=True)
         parsed = json.loads(result)
 
         if parsed.get("no_data"):

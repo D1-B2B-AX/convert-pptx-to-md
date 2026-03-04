@@ -6,19 +6,17 @@ from io import BytesIO
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pptx import Presentation
-from openai import OpenAI
 from dotenv import load_dotenv
 
 from utils.pptx_parser import (
     generate_doc_id, group_slides_into_courses, strip_code_fences
 )
-from extract_curriculum_store import generate_curriculum_store_markdown
-from extract_module_store import generate_module_store_json
+from extract_curriculum_store_v2 import generate_curriculum_store_markdown
+from extract_module_store_v2 import generate_module_store_json
 
 load_dotenv()
 
 app = FastAPI(title="Curriculum Dual Store API")
-openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 def build_module_store_files(filename, course_idx, doc_id, parsed):
@@ -28,13 +26,15 @@ def build_module_store_files(filename, course_idx, doc_id, parsed):
     course_name = parsed.get('course_name', '정보 없음')
     client_name = parsed.get('client', '정보 없음')
     industry = parsed.get('industry', '기타')
-    topic = parsed.get('topic', '')
-    target = parsed.get('target', '')
+    target_role = parsed.get('target_role', '')
     level = parsed.get('level', '')
     total_duration = parsed.get('total_duration', '')
     total_days = parsed.get('total_days', 0)
-    tools = parsed.get('tools', '')
-    fmt = parsed.get('format', '')
+    tools_used = parsed.get('tools_used', '')
+    education_format = parsed.get('education_format', '')
+    domain = parsed.get('domain', '')
+    skill_category = parsed.get('skill_category', '')
+    skill_id = parsed.get('skill_id', '')
     overview_summary = parsed.get('overview_summary', '')
     roadmap = parsed.get('roadmap', '')
 
@@ -42,15 +42,17 @@ def build_module_store_files(filename, course_idx, doc_id, parsed):
     overview_lines = [
         f"# {client_name}: {course_name}",
         f"DOC_ID: {doc_id}",
+        f"SOURCE_FILE: {filename}",
         f"CLIENT: {client_name}",
         f"INDUSTRY: {industry}",
-        f"TOPIC: {topic}",
-        f"TARGET: {target}",
+        f"TARGET_ROLE: {target_role}",
         f"LEVEL: {level}",
         f"DURATION: {total_duration} ({total_days}일)",
-        f"TOOLS: {tools}",
-        f"FORMAT: {fmt}",
-        f"SOURCE_FILE: {filename}",
+        f"TOOLS_USED: {tools_used}",
+        f"EDUCATION_FORMAT: {education_format}",
+        f"DOMAIN: {domain}",
+        f"SKILL_CATEGORY: {skill_category}",
+        f"SKILL_ID: {skill_id}",
         "",
         "## 교육 개요",
         overview_summary,
@@ -69,18 +71,19 @@ def build_module_store_files(filename, course_idx, doc_id, parsed):
 
     overview_meta = {
         "doc_id": doc_id,
-        "doc_type": "course_overview",
+        "source_file": filename,
         "course_name": course_name,
         "client": client_name,
         "industry": industry,
-        "topic": topic,
-        "target": target,
+        "target_role": target_role,
         "level": level,
         "total_duration": total_duration,
         "total_days": total_days,
-        "tools": tools,
-        "format": fmt,
-        "source_file": filename,
+        "tools_used": tools_used,
+        "education_format": education_format,
+        "domain": domain,
+        "skill_category": skill_category,
+        "skill_id": skill_id,
     }
     files.append({
         "filename": "course_overview.md",
@@ -95,7 +98,11 @@ def build_module_store_files(filename, course_idx, doc_id, parsed):
         module_name = mod.get('module_name', 'unknown')
         module_summary = mod.get('module_summary', '')
         duration = mod.get('duration', '')
-        mod_tools = mod.get('tools', '')
+        mod_tools_used = mod.get('tools_used', '')
+        mod_education_format = mod.get('education_format', '')
+        mod_domain = mod.get('domain', '')
+        mod_skill_category = mod.get('skill_category', '')
+        mod_skill_id = mod.get('skill_id', '')
         objectives = mod.get('objectives', [])
         details = mod.get('details', [])
         practices = mod.get('practices', [])
@@ -104,14 +111,24 @@ def build_module_store_files(filename, course_idx, doc_id, parsed):
         safe_name = re.sub(r'_+', '_', safe_name).strip('_').lower()
         md_filename = f"d{day:02d}_m{mi:02d}_{safe_name}.md"
 
+        mod_doc_id = f"{doc_id}::m{mi:02d}"
         lines = [
-            f"# {client_name}: {course_name}",
-            f"{day}일차 | {total_duration} | {industry} | {level}",
-            "",
-            f"## {module_name}",
-            f"MODULE_SUMMARY: {module_summary}",
+            f"# [MODULE] {module_name}",
+            f"DOC_ID: {mod_doc_id}",
+            f"SOURCE_FILE: {filename}",
+            f"CLIENT: {client_name}",
+            f"INDUSTRY: {industry}",
+            f"TARGET_ROLE: {target_role if target_role else '정보 없음'}",
+            f"LEVEL: {level}",
             f"DURATION: {duration}",
-            f"TOOLS: {mod_tools if mod_tools else '-'}",
+            f"TOOLS_USED: {mod_tools_used if mod_tools_used else '정보 없음'}",
+            f"EDUCATION_FORMAT: {mod_education_format}",
+            f"DOMAIN: {mod_domain}",
+            f"SKILL_CATEGORY: {mod_skill_category}",
+            f"SKILL_ID: {mod_skill_id}",
+            "",
+            "## 모듈 요약",
+            module_summary,
             "",
         ]
         if objectives:
@@ -131,19 +148,22 @@ def build_module_store_files(filename, course_idx, doc_id, parsed):
             lines.append("")
 
         mod_meta = {
-            "doc_id": f"{doc_id}::m{mi:02d}",
-            "doc_type": "module",
-            "course_name": course_name,
+            "doc_id": mod_doc_id,
+            "source_file": filename,
             "client": client_name,
             "industry": industry,
+            "target_role": target_role,
+            "level": level,
+            "duration": duration,
+            "tools_used": mod_tools_used,
+            "education_format": mod_education_format,
+            "domain": mod_domain,
+            "skill_category": mod_skill_category,
+            "skill_id": mod_skill_id,
             "module_name": module_name,
             "module_summary": module_summary,
             "day": day,
             "module_index": mi,
-            "duration": duration,
-            "tools": mod_tools,
-            "level": level,
-            "source_file": filename,
         }
         files.append({
             "filename": md_filename,
