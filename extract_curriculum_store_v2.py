@@ -112,21 +112,21 @@ SKILL_ID: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
 
         # metadata 추출 (헤더 필드에서 파싱)
         metadata = {
-            "doc_id": doc_id,
-            "source_file": filename,
-            "course_index": course_idx,
+            "docId": doc_id,
+            "sourceFile": filename,
+            "courseIndex": course_idx,
         }
         field_patterns = {
             "client": r'^CLIENT: (.+)$',
             "industry": r'^INDUSTRY: (.+)$',
-            "target_role": r'^TARGET_ROLE: (.+)$',
+            "targetRole": r'^TARGET_ROLE: (.+)$',
             "level": r'^LEVEL: (.+)$',
             "duration": r'^DURATION: (.+)$',
-            "tools_used": r'^TOOLS_USED: (.+)$',
-            "education_format": r'^EDUCATION_FORMAT: (.+)$',
+            "toolsUsed": r'^TOOLS_USED: (.+)$',
+            "educationFormat": r'^EDUCATION_FORMAT: (.+)$',
             "domain": r'^DOMAIN: (.+)$',
-            "skill_category": r'^SKILL_CATEGORY: (.+)$',
-            "skill_id": r'^SKILL_ID: (.+)$',
+            "skillCategory": r'^SKILL_CATEGORY: (.+)$',
+            "skillId": r'^SKILL_ID: (.+)$',
         }
         for key, pattern in field_patterns.items():
             match = re.search(pattern, result, re.MULTILINE)
@@ -142,7 +142,7 @@ SKILL_ID: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
 
 def save_curriculum_store(filename, course_idx, md_content, metadata):
     """curriculum.md + metadata.json을 저장합니다."""
-    doc_id = metadata.get('doc_id', generate_doc_id(filename, course_idx))
+    doc_id = metadata.get('docId', generate_doc_id(filename, course_idx))
     safe_id = re.sub(r'[^a-zA-Z0-9가-힣_]', '_', doc_id.replace('CURR::', ''))
     course_dir = os.path.join(OUTPUT_DIR, safe_id)
     os.makedirs(course_dir, exist_ok=True)
