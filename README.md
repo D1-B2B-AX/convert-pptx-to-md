@@ -17,7 +17,9 @@
    - 슬라이드 자동 분류: OVERVIEW / CURRICULUM / EXCLUDE / OTHER
 
 3. **LLM 기반 구조화**
-   - GPT-4o로 Raw Text를 구조화된 Markdown으로 변환
+   - OpenAI(GPT-4o) 또는 Gemini(2.5 Flash)로 Raw Text를 구조화된 Markdown으로 변환
+   - `LLM_PROVIDER` 환경변수로 전환 (코드 변경 불필요)
+   - 스킬 카탈로그 매칭: 과정/모듈별 SKILL_ID 자동 태깅
    - 커리큘럼 무관 내용(강사 프로필, 회사 소개 등) 자동 필터링
    - 환각(Hallucination) 방지 프롬프트 적용
 
@@ -64,28 +66,30 @@ curl -X POST https://your-railway-url/extract \
 ## 프로젝트 구조
 
 ```text
-├── app.py                       # FastAPI 서버 (POST /extract, GET /health)
-├── Dockerfile                   # Railway 배포용
-├── requirements.txt             # Python 의존성
+├── app.py                          # FastAPI 서버 (POST /extract, GET /health)
+├── llm_client.py                   # LLM 추상화 (OpenAI/Gemini 환경변수 전환)
+├── Dockerfile                      # Railway 배포용
+├── requirements.txt                # Python 의존성
 │
-├── extract_curriculum.py        # 양쪽 스토어를 호출하는 러너 (CLI용)
-├── extract_curriculum_store.py  # 커리큘럼 스토어: 테이블 포맷 보존 MD 생성
-├── extract_module_store.py      # 모듈 스토어: 모듈별 개별 파일 + metadata JSON
-├── extract_reference.py         # 레퍼런스(수행실적) 추출
+├── extract_curriculum_store_v2.py  # 커리큘럼 스토어 (스킬 카탈로그 매칭 포함)
+├── extract_module_store_v2.py      # 모듈 스토어 (스킬 카탈로그 매칭 포함)
+├── extract_curriculum_store.py     # v1 원본 (백업용, app.py에서 미사용)
+├── extract_module_store.py         # v1 원본 (백업용, app.py에서 미사용)
+├── extract_reference.py            # 레퍼런스(수행실적) 추출
+├── skill_catalog_260226_v1.md      # 스킬 카탈로그 (SKILL_ID 매칭 참조)
 │
 ├── utils/
-│   ├── pptx_parser.py           # PPTX 파싱, 슬라이드 분류, 과정 그루핑 공통 로직
-│   └── clean_pptx_names.py      # 파일명 일괄 정제 (NFD→NFC 변환 포함)
+│   ├── pptx_parser.py              # PPTX 파싱, 슬라이드 분류, 과정 그루핑 공통 로직
+│   └── clean_pptx_names.py         # 파일명 일괄 정제 (NFD→NFC 변환 포함)
 │
-├── input/                       # 원본 PPTX 파일 (git 제외)
+├── input/                          # 원본 PPTX 파일 (git 제외)
 ├── output/
-│   ├── curriculum/              # 기존 단일 MD 출력 (레거시)
-│   ├── curriculum_store/        # 커리큘럼 스토어 출력 (git 제외)
-│   ├── module_store/            # 모듈 스토어 출력 (git 제외)
-│   └── reference/               # 레퍼런스 출력 (git 제외)
+│   ├── curriculum_store/           # 커리큘럼 스토어 출력 (git 제외)
+│   ├── module_store/               # 모듈 스토어 출력 (git 제외)
+│   └── reference/                  # 레퍼런스 출력 (git 제외)
 │
-├── .env                         # OpenAI API Key (git 제외)
-├── .env.example                 # 환경변수 템플릿
+├── .env                            # API Key (git 제외)
+├── .env.example                    # 환경변수 템플릿
 └── README.md
 ```
 
@@ -95,8 +99,18 @@ curl -X POST https://your-railway-url/extract \
 ### Railway
 
 1. GitHub 레포 연결: `D1-B2B-AX/convert-pptx-to-md`
-2. 환경변수 설정: `OPENAI_API_KEY`
-3. Dockerfile 기반 자동 빌드/배포
+2. 환경변수 설정 (아래 표 참고)
+3. Dockerfile 기반 자동 빌드/배포 (main push 시 자동)
+
+### 환경변수
+
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `LLM_PROVIDER` | `openai` | `gemini`로 변경 시 Gemini 사용 |
+| `OPENAI_API_KEY` | - | OpenAI 사용 시 필수 |
+| `OPENAI_MODEL` | `gpt-4o` | OpenAI 모델 지정 |
+| `GEMINI_API_KEY` | - | Gemini 사용 시 필수 |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini 모델 지정 |
 
 ### 로컬 실행
 
@@ -108,11 +122,8 @@ pip install -r requirements.txt
 
 # 환경변수
 cp .env.example .env
-# .env에 OPENAI_API_KEY 입력
+# .env에 API Key + LLM_PROVIDER 설정
 
 # 서버 실행
 uvicorn app:app --host 0.0.0.0 --port 8000
-
-# CLI 실행 (input/ 폴더의 PPTX 일괄 처리)
-python extract_curriculum.py
 ```
