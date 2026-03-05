@@ -79,4 +79,20 @@ ChatGPT, Claude, Gemini, Perplexity, Copilot, CopilotStudio, Midjourney, DALL-E,
 
 ---
 
+## 요약
+
+| 필드 | 값 개수 | 복수 허용 | 비고 |
+|---|---|---|---|
+| domain | 고정 3개 | X (1개만) | G, D, DA |
+| skillCategory | 고정 13개 | X (1개만) | GT, GM 등 |
+| skillId | 카탈로그 126개 | O (쉼표 구분) | 1~3개 |
+| level | 고정 3개 | X (1개만) | |
+| industry | 고정 11개 | X (1개만) | |
+| targetRole | 고정 7개 | X (1개만) | |
+| duration | 자유 (숫자) | X | 시간 단위 정수 |
+| educationFormat | 고정 5개 | X (1개만) | |
+| toolsUsed | 카탈로그 참조 | O (쉼표 구분) | 3개 이내 권장 |
+
+---
+
 *2026-03-05 적용 / skills_catalog_v3.jsonl (126개) 기준*
