@@ -12,13 +12,36 @@ load_dotenv()
 
 SOURCE_DIR = './input'
 OUTPUT_DIR = './output/curriculum_store'
-SKILL_CATALOG_PATH = os.path.join(os.path.dirname(__file__), 'skill_catalog_260226_v1.md')
+SKILL_CATALOG_PATH = os.path.join(os.path.dirname(__file__), '..', 'archetypes', 'skills_catalog_v3.jsonl')
 
 
 def load_skill_catalog():
-    """스킬 카탈로그 파일을 읽어 반환합니다."""
+    """스킬 카탈로그 JSONL을 읽어 프롬프트용 텍스트로 변환합니다."""
+    entries = []
     with open(SKILL_CATALOG_PATH, 'r', encoding='utf-8') as f:
-        return f.read()
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            obj = json.loads(line)
+            entries.append(obj)
+
+    # 도메인별로 그룹핑
+    domains = {}
+    for e in entries:
+        key = f"{e['domain_name']} ({e['domain_code']})"
+        domains.setdefault(key, []).append(e)
+
+    lines = ["## 스킬 카탈로그"]
+    for domain, skills in sorted(domains.items()):
+        lines.append(f"\n### {domain}")
+        lines.append("| ID | name | level | family |")
+        lines.append("|---|---|---|---|")
+        for s in skills:
+            family = f"{s['family_name']} ({s['domain_code']}-{s['family_code']})"
+            lines.append(f"| {s['id']} | {s['name']} | {s['level']} | {family} |")
+
+    return '\n'.join(lines)
 
 
 def generate_curriculum_store_markdown(filename, course_idx, overview_text, curriculum_text):
@@ -26,7 +49,6 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
     if len(curriculum_text) < 50:
         return None, None
 
-    doc_id = generate_doc_id(filename, course_idx)
     skill_catalog = load_skill_catalog()
 
     prompt = f"""당신은 B2B 교육 제안서에서 커리큘럼을 추출하여 RAG 검색에 최적화된 Markdown으로 변환하는 전문가입니다.
@@ -34,7 +56,6 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
 [Input]
 - File: {filename}
 - Course Index: {course_idx}
-- DOC_ID: {doc_id}
 - Overview: {overview_text[:5000]}
 - Curriculum: {curriculum_text[:25000]}
 
@@ -42,10 +63,11 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
 {skill_catalog}
 
 [SKILL_ID 매칭 지침]
-- 위 스킬 카탈로그에서 이 과정의 핵심 내용과 가장 가까운 대표 스킬 1개를 선택하십시오.
-- SKILL_ID 필드에 해당 스킬의 ID를 정확히 기입하십시오 (예: G-T001, G-R001, D-M003 등).
-- SKILL_CATEGORY는 선택한 SKILL_ID의 카테고리 접두사입니다 (예: G-T, G-M, D-A 등).
-- DOMAIN은 SKILL_ID가 G-로 시작하면 GenAI, D-로 시작하면 MLDL입니다.
+- 위 스킬 카탈로그에서 이 과정의 핵심 스킬 1~3개를 선택하십시오.
+- skillId 필드에 하이픈을 제거한 형식으로 기입하십시오 (예: G-T001 → GT001, DA-A003 → DAA003).
+- 복수 스킬은 공백 없이 쉼표로 구분하십시오 (예: GT001,GM002).
+- skillCategory는 선택한 skillId의 카테고리 접두사입니다 (예: GT, GM, DA, DAA 등). 하이픈 제거.
+- domain은 G(GenAI), D(MLDL), DA(Data Analytics & BI) 코드로 기입하십시오.
 
 [Task]
 위 Raw Text를 분석하여 아래 포맷에 정확히 맞는 Markdown을 출력하십시오.
@@ -61,18 +83,15 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
 [Output Format - 반드시 이 구조를 따르십시오]
 
 # [COURSE] {{과정명}}
-docId: {doc_id}
-sourceFile: {filename}
-client: {{고객사명 - 파일명이나 본문에서 추출}}
-industry: {{산업군 - 금융/제조/IT/통신/유통/공공/에너지/의료/교육/기타}}
-targetRole: {{교육 대상 직무}}
-level: {{초급 / 기초 / 중급 / 고급 중 택 1}}
-duration: {{총 교육 시수}}
-toolsUsed: {{사용 도구 - 쉼표 구분}}
-educationFormat: {{특강/데모형 / 이론/개념 전달형 / 실습/툴 마스터형 / 프로젝트/PoC형 / 워크숍/문제 해결형 중 택 1}}
-domain: {{GenAI 또는 MLDL}}
-skillCategory: {{G-T, G-M, G-R, G-A, G-C, D-T, D-M, D-A, D-C 중 택 1}}
-skillId: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
+domain: {{G / D / DA 중 택 1 — G=GenAI, D=MLDL, DA=Data Analytics & BI}}
+skillCategory: {{하이픈 제거 형식. GT, GM, GR, GA, GC, DT, DM, DA, DC, DAT, DAM, DAA, DAC 중 택 1}}
+skillId: {{스킬 카탈로그에서 핵심 스킬 1~3개, 하이픈 제거, 쉼표 구분. 예: GT001,GM002}}
+level: {{basic / intermediate / advanced 중 택 1}}
+industry: {{제조 / 금융 / IT / 유통 / 의료 / 교육 / 공공 / 에너지 / 건설 / 미디어 / 기타 중 택 1}}
+targetRole: {{임원 / 중간관리자 / 실무자 / 신입사원 / 개발자 / 데이터분석가 / 전사 중 택 1}}
+duration: {{총 교육 시수 - 숫자만. 예: 8, 16, 24}}
+educationFormat: {{강의형 / 실습형 / 프로젝트형 / 혼합형 / 워크숍형 중 택 1}}
+toolsUsed: {{주요 도구 3개 이내, 공백 없이 쉼표 구분. 예: ChatGPT,Python,LangChain}}
 
 ## 교육 개요
 {{교육의 배경, 목적, 학습 목표를 2~4문장으로 요약}}
@@ -111,22 +130,17 @@ skillId: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
         result = strip_code_fences(result)
 
         # metadata 추출 (헤더 필드에서 파싱)
-        metadata = {
-            "docId": doc_id,
-            "sourceFile": filename,
-            "courseIndex": course_idx,
-        }
+        metadata = {}
         field_patterns = {
-            "client": r'^client: (.+)$',
-            "industry": r'^industry: (.+)$',
-            "targetRole": r'^targetRole: (.+)$',
-            "level": r'^level: (.+)$',
-            "duration": r'^duration: (.+)$',
-            "toolsUsed": r'^toolsUsed: (.+)$',
-            "educationFormat": r'^educationFormat: (.+)$',
-            "domain": r'^domain: (.+)$',
-            "skillCategory": r'^skillCategory: (.+)$',
-            "skillId": r'^skillId: (.+)$',
+            "domain": r'^domain:[ \t]*(.+)$',
+            "skillCategory": r'^skillCategory:[ \t]*(.+)$',
+            "skillId": r'^skillId:[ \t]*(.+)$',
+            "level": r'^level:[ \t]*(.+)$',
+            "industry": r'^industry:[ \t]*(.+)$',
+            "targetRole": r'^targetRole:[ \t]*(.+)$',
+            "duration": r'^duration:[ \t]*(.+)$',
+            "educationFormat": r'^educationFormat:[ \t]*(.+)$',
+            "toolsUsed": r'^toolsUsed:[ \t]*(.+)$',
         }
         for key, pattern in field_patterns.items():
             match = re.search(pattern, result, re.MULTILINE)
@@ -142,7 +156,7 @@ skillId: {{스킬 카탈로그에서 대표 스킬 ID 1개}}
 
 def save_curriculum_store(filename, course_idx, md_content, metadata):
     """curriculum.md + metadata.json을 저장합니다."""
-    doc_id = metadata.get('docId', generate_doc_id(filename, course_idx))
+    doc_id = generate_doc_id(filename, course_idx)
     safe_id = re.sub(r'[^a-zA-Z0-9가-힣_]', '_', doc_id.replace('CURR::', ''))
     course_dir = os.path.join(OUTPUT_DIR, safe_id)
     os.makedirs(course_dir, exist_ok=True)

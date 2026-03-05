@@ -72,7 +72,7 @@ curl -X POST https://your-railway-url/extract \
 ├── extract_curriculum_store_v2.py  # 커리큘럼 스토어 (스킬 카탈로그 매칭 포함)
 ├── extract_curriculum_store.py     # v1 원본 (백업용, app.py에서 미사용)
 ├── extract_reference.py            # 레퍼런스(수행실적) 추출
-├── skill_catalog_260226_v1.md      # 스킬 카탈로그 (SKILL_ID 매칭 참조)
+├── ../archetypes/skills_catalog_v3.jsonl  # 스킬 카탈로그 v3 (SKILL_ID 매칭 참조)
 │
 ├── utils/
 │   ├── pptx_parser.py              # PPTX 파싱, 슬라이드 분류, 과정 그루핑 공통 로직
