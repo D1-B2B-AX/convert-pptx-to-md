@@ -12,7 +12,7 @@ load_dotenv()
 
 SOURCE_DIR = './input'
 OUTPUT_DIR = './output/curriculum_store'
-SKILL_CATALOG_PATH = os.path.join(os.path.dirname(__file__), '..', 'archetypes', 'skills_catalog_v3.jsonl')
+SKILL_CATALOG_PATH = os.path.join(os.path.dirname(__file__), 'skills_catalog_v3.jsonl')
 
 
 def load_skill_catalog():
