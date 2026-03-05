@@ -2,14 +2,17 @@
 
 교육 제안서 PPTX 파일을 분석하여 RAG(Retrieval-Augmented Generation)에 최적화된 Markdown으로 자동 변환하는 **FastAPI 서버**입니다.
 
-**Dual Store 아키텍처**로 커리큘럼 스토어(테이블 포맷 보존)와 모듈 스토어(모듈별 개별 파일)를 동시에 생성하여, Gemini File Search Store 기반 RAG 검색 정확도를 높입니다.
+**커리큘럼 스토어** 전용으로, 원본 테이블 구조를 보존한 MD + 메타데이터를 생성하여 Gemini File Search Store 기반 RAG 검색 정확도를 높입니다.
+
+> **모듈 아키타입 스토어**는 별도로 마련된 MD 파일을 n8n 워크플로우(`2-B`)에서 직접 업로드하며, 이 서버에서는 처리하지 않습니다.
 
 
 ## 주요 기능
 
-1. **Dual Store 변환**
-   - **커리큘럼 스토어**: 원본 테이블 구조를 그대로 보존한 단일 MD 파일 + 교육 설계 의도(DAY_FLOW, PROGRESSION, DESIGN_RATIONALE) 포함
-   - **모듈 스토어**: 모듈별 개별 MD 파일 분리 + 과정 개요(course_overview.md) + custom_metadata JSON
+1. **커리큘럼 스토어 변환**
+   - 원본 테이블 구조를 그대로 보존한 단일 MD 파일
+   - 교육 설계 의도(DAY_FLOW, PROGRESSION, DESIGN_RATIONALE) 포함
+   - custom_metadata JSON 생성
 
 2. **스마트 PPTX 파싱**
    - 숨김 슬라이드 자동 차단 (XML 레벨 `is_hidden` 감지)
@@ -19,12 +22,12 @@
 3. **LLM 기반 구조화**
    - OpenAI(GPT-4o) 또는 Gemini(2.5 Flash)로 Raw Text를 구조화된 Markdown으로 변환
    - `LLM_PROVIDER` 환경변수로 전환 (코드 변경 불필요)
-   - 스킬 카탈로그 매칭: 과정/모듈별 SKILL_ID 자동 태깅
+   - 스킬 카탈로그 매칭: 과정별 SKILL_ID 자동 태깅
    - 커리큘럼 무관 내용(강사 프로필, 회사 소개 등) 자동 필터링
    - 환각(Hallucination) 방지 프롬프트 적용
 
 4. **FastAPI 서버 (Railway 배포)**
-   - `POST /extract` — PPTX 업로드 → 양쪽 스토어 결과를 JSON으로 반환
+   - `POST /extract` — PPTX 업로드 → 커리큘럼 스토어 결과를 JSON으로 반환
    - `GET /health` — 헬스 체크
    - n8n 워크플로우에서 HTTP Request로 호출
 
@@ -33,7 +36,7 @@
 
 ### `POST /extract`
 
-PPTX 파일을 multipart로 업로드하면 dual store 결과를 반환합니다.
+PPTX 파일을 multipart로 업로드하면 커리큘럼 스토어 결과를 반환합니다.
 
 ```bash
 curl -X POST https://your-railway-url/extract \
@@ -51,12 +54,7 @@ curl -X POST https://your-railway-url/extract \
       "curriculum_store": {
         "content": "# [COURSE] AI 역량 강화 과정\n...",
         "metadata": { "doc_type": "curriculum", "client": "ABC기업", ... }
-      },
-      "module_store": [
-        { "filename": "course_overview.md", "content": "...", "metadata": { ... } },
-        { "filename": "d01_m01_llm_기초.md", "content": "...", "metadata": { ... } },
-        ...
-      ]
+      }
     }
   ]
 }
@@ -72,9 +70,7 @@ curl -X POST https://your-railway-url/extract \
 ├── requirements.txt                # Python 의존성
 │
 ├── extract_curriculum_store_v2.py  # 커리큘럼 스토어 (스킬 카탈로그 매칭 포함)
-├── extract_module_store_v2.py      # 모듈 스토어 (스킬 카탈로그 매칭 포함)
 ├── extract_curriculum_store.py     # v1 원본 (백업용, app.py에서 미사용)
-├── extract_module_store.py         # v1 원본 (백업용, app.py에서 미사용)
 ├── extract_reference.py            # 레퍼런스(수행실적) 추출
 ├── skill_catalog_260226_v1.md      # 스킬 카탈로그 (SKILL_ID 매칭 참조)
 │
@@ -85,7 +81,6 @@ curl -X POST https://your-railway-url/extract \
 ├── input/                          # 원본 PPTX 파일 (git 제외)
 ├── output/
 │   ├── curriculum_store/           # 커리큘럼 스토어 출력 (git 제외)
-│   ├── module_store/               # 모듈 스토어 출력 (git 제외)
 │   └── reference/                  # 레퍼런스 출력 (git 제외)
 │
 ├── .env                            # API Key (git 제외)
