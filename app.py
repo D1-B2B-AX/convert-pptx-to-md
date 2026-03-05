@@ -12,7 +12,7 @@ from extract_curriculum_store_v2 import generate_curriculum_store_markdown
 
 load_dotenv()
 
-app = FastAPI(title="Curriculum Dual Store API")
+app = FastAPI(title="Curriculum Store API")
 
 
 @app.get("/health")
