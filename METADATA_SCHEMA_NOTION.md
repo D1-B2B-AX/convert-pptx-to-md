@@ -9,14 +9,14 @@
 | 필드 | 설명 | 값 | 매칭 방식 |
 |------|------|-----|-----------|
 | `domain` | 교육 도메인 | `G`, `D`, `DA` | `=` 정확 매칭 |
-| `skillCategory` | 스킬 패밀리 코드 | `GT`, `GM`, `DAA` 등 | `=` 정확 매칭 |
-| `skillId` | 핵심 스킬 ID | `GT001,GM002` | 쉼표 구분, 1~3개 |
+| `skill_category` | 스킬 패밀리 코드 | `GT`, `GM`, `DAA` 등 | `=` 정확 매칭 |
+| `skill_id` | 핵심 스킬 ID | `GT001,GM002` | 쉼표 구분, 1~3개 |
 | `level` | 교육 난이도 | `basic`, `intermediate`, `advanced` | `=` 정확 매칭 |
 | `industry` | 산업/업종 | `제조`, `금융` 등 11개 | `=` 정확 매칭 |
-| `targetRole` | 교육 대상 | `실무자`, `개발자` 등 7개 | `=` 정확 매칭 |
+| `target_role` | 교육 대상 | `실무자`, `개발자` 등 7개 | `=` 정확 매칭 |
 | `duration` | 총 교육 시수 | `8`, `16`, `24` | `=` 정확 매칭 |
-| `educationFormat` | 교육 형태 | `강의형`, `실습형` 등 5개 | `=` 정확 매칭 |
-| `toolsUsed` | 사용 도구 | `ChatGPT,Python,LangChain` | 쉼표 구분, 3개 이내 |
+| `education_format` | 교육 형태 | `강의형`, `실습형` 등 5개 | `=` 정확 매칭 |
+| `tools_used` | 사용 도구 | `ChatGPT,Python,LangChain` | 쉼표 구분, 3개 이내 |
 
 ---
 
@@ -84,14 +84,14 @@ ChatGPT, Claude, Gemini, Perplexity, Copilot, CopilotStudio, Midjourney, DALL-E,
 | 필드 | 값 개수 | 복수 허용 | 비고 |
 |---|---|---|---|
 | domain | 고정 3개 | X (1개만) | G, D, DA |
-| skillCategory | 고정 13개 | X (1개만) | GT, GM 등 |
-| skillId | 카탈로그 126개 | O (쉼표 구분) | 1~3개 |
+| skill_category | 고정 13개 | X (1개만) | GT, GM, DAA 등 |
+| skill_id | 카탈로그 126개 | O (쉼표 구분) | 1~3개 |
 | level | 고정 3개 | X (1개만) | |
 | industry | 고정 11개 | X (1개만) | |
-| targetRole | 고정 7개 | X (1개만) | |
+| target_role | 고정 7개 | X (1개만) | |
 | duration | 자유 (숫자) | X | 시간 단위 정수 |
-| educationFormat | 고정 5개 | X (1개만) | |
-| toolsUsed | 카탈로그 참조 | O (쉼표 구분) | 3개 이내 권장 |
+| education_format | 고정 5개 | X (1개만) | |
+| tools_used | 카탈로그 참조 | O (쉼표 구분) | 3개 이내 권장 |
 
 ---
 

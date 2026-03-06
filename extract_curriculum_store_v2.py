@@ -64,9 +64,9 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
 
 [SKILL_ID 매칭 지침]
 - 위 스킬 카탈로그에서 이 과정의 핵심 스킬 1~3개를 선택하십시오.
-- skillId 필드에 하이픈을 제거한 형식으로 기입하십시오 (예: G-T001 → GT001, DA-A003 → DAA003).
+- skill_id 필드에 하이픈을 제거한 형식으로 기입하십시오 (예: G-T001 → GT001, DA-A003 → DAA003).
 - 복수 스킬은 공백 없이 쉼표로 구분하십시오 (예: GT001,GM002).
-- skillCategory는 선택한 skillId의 카테고리 접두사입니다 (예: GT, GM, DA, DAA 등). 하이픈 제거.
+- skill_category는 선택한 skill_id의 카테고리 접두사입니다 (예: GT, GM, DA, DAA 등). 하이픈 제거.
 - domain은 G(GenAI), D(MLDL), DA(Data Analytics & BI) 코드로 기입하십시오.
 
 [Task]
@@ -84,14 +84,14 @@ def generate_curriculum_store_markdown(filename, course_idx, overview_text, curr
 
 # [COURSE] {{과정명}}
 domain: {{G / D / DA 중 택 1 — G=GenAI, D=MLDL, DA=Data Analytics & BI}}
-skillCategory: {{하이픈 제거 형식. GT, GM, GR, GA, GC, DT, DM, DA, DC, DAT, DAM, DAA, DAC 중 택 1}}
-skillId: {{스킬 카탈로그에서 핵심 스킬 1~3개, 하이픈 제거, 쉼표 구분. 예: GT001,GM002}}
+skill_category: {{하이픈 제거 형식. GT, GM, GR, GA, GC, DT, DM, DA, DC, DAT, DAM, DAA, DAC 중 택 1}}
+skill_id: {{스킬 카탈로그에서 핵심 스킬 1~3개, 하이픈 제거, 쉼표 구분. 예: GT001,GM002}}
 level: {{basic / intermediate / advanced 중 택 1}}
 industry: {{제조 / 금융 / IT / 유통 / 의료 / 교육 / 공공 / 에너지 / 건설 / 미디어 / 기타 중 택 1}}
-targetRole: {{임원 / 중간관리자 / 실무자 / 신입사원 / 개발자 / 데이터분석가 / 전사 중 택 1}}
+target_role: {{임원 / 중간관리자 / 실무자 / 신입사원 / 개발자 / 데이터분석가 / 전사 중 택 1}}
 duration: {{총 교육 시수 - 숫자만. 예: 8, 16, 24}}
-educationFormat: {{강의형 / 실습형 / 프로젝트형 / 혼합형 / 워크숍형 중 택 1}}
-toolsUsed: {{주요 도구 3개 이내, 공백 없이 쉼표 구분. 예: ChatGPT,Python,LangChain}}
+education_format: {{강의형 / 실습형 / 프로젝트형 / 혼합형 / 워크숍형 중 택 1}}
+tools_used: {{주요 도구 3개 이내, 공백 없이 쉼표 구분. 예: ChatGPT,Python,LangChain}}
 
 ## 교육 개요
 {{교육의 배경, 목적, 학습 목표를 2~4문장으로 요약}}
@@ -133,14 +133,14 @@ toolsUsed: {{주요 도구 3개 이내, 공백 없이 쉼표 구분. 예: ChatGP
         metadata = {}
         field_patterns = {
             "domain": r'^domain:[ \t]*(.+)$',
-            "skillCategory": r'^skillCategory:[ \t]*(.+)$',
-            "skillId": r'^skillId:[ \t]*(.+)$',
+            "skill_category": r'^skill_category:[ \t]*(.+)$',
+            "skill_id": r'^skill_id:[ \t]*(.+)$',
             "level": r'^level:[ \t]*(.+)$',
             "industry": r'^industry:[ \t]*(.+)$',
-            "targetRole": r'^targetRole:[ \t]*(.+)$',
+            "target_role": r'^target_role:[ \t]*(.+)$',
             "duration": r'^duration:[ \t]*(.+)$',
-            "educationFormat": r'^educationFormat:[ \t]*(.+)$',
-            "toolsUsed": r'^toolsUsed:[ \t]*(.+)$',
+            "education_format": r'^education_format:[ \t]*(.+)$',
+            "tools_used": r'^tools_used:[ \t]*(.+)$',
         }
         for key, pattern in field_patterns.items():
             match = re.search(pattern, result, re.MULTILINE)
