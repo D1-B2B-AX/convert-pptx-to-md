@@ -30,7 +30,7 @@
    - `GET /` — 서비스 정보
    - `POST /extract` — PPTX 업로드 → 커리큘럼 스토어 결과를 JSON으로 반환
    - `GET /health` — 헬스 체크
-   - n8n 워크플로우에서 HTTP Request로 호출
+   - n8n과 같은 Docker Compose stack에서 내부 HTTP Request로 호출
 
 
 ## API
@@ -40,7 +40,7 @@
 PPTX 파일을 multipart로 업로드하면 커리큘럼 스토어 결과를 반환합니다.
 
 ```bash
-curl -X POST https://pptx-md-converter.skillflo.app/extract \
+curl -X POST http://pptx-md-converter-api:8000/extract \
   -F "file=@ABC기업 AI 역량 강화.pptx"
 ```
 
@@ -68,6 +68,7 @@ curl -X POST https://pptx-md-converter.skillflo.app/extract \
 ├── app.py                          # FastAPI 서버 (POST /extract, GET /health)
 ├── llm_client.py                   # LLM 추상화 (OpenAI/Gemini 환경변수 전환)
 ├── Dockerfile                      # Coolify 배포용
+├── docker-compose.coolify.yml      # n8n + 변환 API 통합 Coolify stack
 ├── requirements.txt                # Python 의존성
 │
 ├── extract_curriculum_store_v2.py  # 커리큘럼 스토어 (스킬 카탈로그 매칭 포함)
@@ -97,10 +98,10 @@ curl -X POST https://pptx-md-converter.skillflo.app/extract \
 
 ### Coolify
 
-1. Coolify에서 새 서비스 생성
+1. Coolify에서 Docker Compose 서비스 생성
 2. GitHub 레포 연결: `D1-B2B-AX/convert-pptx-to-md`
-3. Dockerfile 기반 배포 선택
-4. App port를 `8000`으로 설정
+3. Compose 파일로 `docker-compose.coolify.yml` 선택
+4. n8n 서비스에 도메인 연결
 5. 환경변수 설정 (아래 표 참고)
 
 자세한 배포 절차는 [`docs/COOLIFY_DEPLOYMENT.md`](docs/COOLIFY_DEPLOYMENT.md)를 참고하십시오.
