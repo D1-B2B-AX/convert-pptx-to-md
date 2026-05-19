@@ -1,7 +1,7 @@
 import os
 from io import BytesIO
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import Depends, FastAPI, Header, UploadFile, File, HTTPException
 from pptx import Presentation
 from dotenv import load_dotenv
 
@@ -12,7 +12,31 @@ from extract_curriculum_store_v2 import generate_curriculum_store_markdown
 
 load_dotenv()
 
-app = FastAPI(title="Curriculum Store API")
+API_AUTH_TOKEN = os.environ.get("API_AUTH_TOKEN", "").strip()
+
+app = FastAPI(title="PPTX Markdown Converter API")
+
+
+def verify_api_token(authorization: str | None = Header(default=None)):
+    if not API_AUTH_TOKEN:
+        return
+
+    expected = f"Bearer {API_AUTH_TOKEN}"
+    if authorization != expected:
+        raise HTTPException(status_code=401, detail="Invalid or missing API token")
+
+
+@app.get("/")
+def root():
+    return {
+        "service": "pptx-md-converter-api",
+        "description": "Upload a PPTX file and receive curriculum-store Markdown JSON.",
+        "endpoints": {
+            "health": "GET /health",
+            "extract": "POST /extract multipart/form-data field=file",
+        },
+        "auth_required": bool(API_AUTH_TOKEN),
+    }
 
 
 @app.get("/health")
@@ -20,9 +44,10 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/extract")
+@app.post("/extract", dependencies=[Depends(verify_api_token)])
 async def extract(file: UploadFile = File(...)):
-    if not file.filename.endswith('.pptx'):
+    filename = file.filename or ""
+    if not filename.lower().endswith('.pptx'):
         raise HTTPException(400, "Only .pptx files are supported")
 
     content = await file.read()
@@ -33,13 +58,13 @@ async def extract(file: UploadFile = File(...)):
 
     courses = group_slides_into_courses(prs)
     if not courses:
-        return {"source_file": file.filename, "courses": []}
+        return {"source_file": filename, "courses": []}
 
     results = []
     for idx, course in enumerate(courses):
         full_overview = "\n\n".join(course['overview'])
         full_curriculum = "\n\n".join(course['curriculum'])
-        doc_id = generate_doc_id(file.filename, idx + 1)
+        doc_id = generate_doc_id(filename, idx + 1)
 
         course_result = {
             "doc_id": doc_id,
@@ -48,7 +73,7 @@ async def extract(file: UploadFile = File(...)):
 
         # Curriculum store
         md_content, metadata = generate_curriculum_store_markdown(
-            file.filename, idx + 1, full_overview, full_curriculum
+            filename, idx + 1, full_overview, full_curriculum
         )
         if md_content and metadata:
             course_result["curriculum_store"] = {
@@ -58,7 +83,7 @@ async def extract(file: UploadFile = File(...)):
 
         results.append(course_result)
 
-    return {"source_file": file.filename, "courses": results}
+    return {"source_file": filename, "courses": results}
 
 
 if __name__ == "__main__":

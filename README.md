@@ -26,7 +26,8 @@
    - 커리큘럼 무관 내용(강사 프로필, 회사 소개 등) 자동 필터링
    - 환각(Hallucination) 방지 프롬프트 적용
 
-4. **FastAPI 서버 (Railway 배포)**
+4. **PPTX Markdown Converter API (Coolify 배포)**
+   - `GET /` — 서비스 정보
    - `POST /extract` — PPTX 업로드 → 커리큘럼 스토어 결과를 JSON으로 반환
    - `GET /health` — 헬스 체크
    - n8n 워크플로우에서 HTTP Request로 호출
@@ -39,7 +40,7 @@
 PPTX 파일을 multipart로 업로드하면 커리큘럼 스토어 결과를 반환합니다.
 
 ```bash
-curl -X POST https://your-railway-url/extract \
+curl -X POST https://pptx-md-converter.skillflo.app/extract \
   -F "file=@ABC기업 AI 역량 강화.pptx"
 ```
 
@@ -66,7 +67,7 @@ curl -X POST https://your-railway-url/extract \
 ```text
 ├── app.py                          # FastAPI 서버 (POST /extract, GET /health)
 ├── llm_client.py                   # LLM 추상화 (OpenAI/Gemini 환경변수 전환)
-├── Dockerfile                      # Railway 배포용
+├── Dockerfile                      # Coolify 배포용
 ├── requirements.txt                # Python 의존성
 │
 ├── extract_curriculum_store_v2.py  # 커리큘럼 스토어 (스킬 카탈로그 매칭 포함)
@@ -77,6 +78,9 @@ curl -X POST https://your-railway-url/extract \
 ├── utils/
 │   ├── pptx_parser.py              # PPTX 파싱, 슬라이드 분류, 과정 그루핑 공통 로직
 │   └── clean_pptx_names.py         # 파일명 일괄 정제 (NFD→NFC 변환 포함)
+├── docs/
+│   ├── API.md                      # API endpoint와 n8n 호출 방식
+│   └── COOLIFY_DEPLOYMENT.md       # Coolify 배포 절차
 │
 ├── input/                          # 원본 PPTX 파일 (git 제외)
 ├── output/
@@ -91,11 +95,16 @@ curl -X POST https://your-railway-url/extract \
 
 ## 배포
 
-### Railway
+### Coolify
 
-1. GitHub 레포 연결: `D1-B2B-AX/convert-pptx-to-md`
-2. 환경변수 설정 (아래 표 참고)
-3. Dockerfile 기반 자동 빌드/배포 (main push 시 자동)
+1. Coolify에서 새 서비스 생성
+2. GitHub 레포 연결: `D1-B2B-AX/convert-pptx-to-md`
+3. Dockerfile 기반 배포 선택
+4. App port를 `8000`으로 설정
+5. 환경변수 설정 (아래 표 참고)
+
+자세한 배포 절차는 [`docs/COOLIFY_DEPLOYMENT.md`](docs/COOLIFY_DEPLOYMENT.md)를 참고하십시오.
+n8n 호출 방식과 응답 형식은 [`docs/API.md`](docs/API.md)에 정리되어 있습니다.
 
 ### 환경변수
 
@@ -106,6 +115,8 @@ curl -X POST https://your-railway-url/extract \
 | `OPENAI_MODEL` | `gpt-4o` | OpenAI 모델 지정 |
 | `GEMINI_API_KEY` | - | Gemini 사용 시 필수 |
 | `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini 모델 지정 |
+| `API_AUTH_TOKEN` | - | 설정 시 `POST /extract`에 Bearer token 인증 요구 |
+| `PORT` | `8000` | 서버 포트 |
 
 ### 로컬 실행
 
